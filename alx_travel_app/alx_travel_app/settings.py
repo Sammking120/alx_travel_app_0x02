@@ -26,6 +26,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-*#&o*&3cc54&8wwyd^-j4_l#kl7-!(!fqic4gsgu_^w(plya)9'
 CHAPA_SECRET_KEY = config("CHAPA_SECRET_KEY")
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
+# settings.py
+
+# Celery configuration
+CELERY_BROKER_URL = 'amqp://localhost'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+# Optional: Store results if needed
+
+
 
 
 # SECURITY WARNING: don't run with debug turned on in production!

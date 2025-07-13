@@ -12,7 +12,7 @@ import uuid
 from .models import Payment, Booking, Listing
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
-
+from .tasks import send_booking_confirmation_email
 
 
 
@@ -36,15 +36,24 @@ class BookingViewSet(viewsets.ModelViewSet):
     serializer_class = BookingSerializer
     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save(guest=self.request.user)
-
     @swagger_auto_schema(
         operation_description="List all bookings or create a new booking",
         responses={200: BookingSerializer(many=True)}
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        # Save booking with the current authenticated user as guest
+        booking = serializer.save(guest=self.request.user)
+
+        # Prepare email data
+        email = booking.guest.email
+        details = f"Location: {booking.location}\nDate: {booking.date}"
+
+        # Send async email
+        send_booking_confirmation_email(email, details)
+        
 from rest_framework.authentication import BasicAuthentication, SessionAuthentication
 from rest_framework.permissions import AllowAny
   
